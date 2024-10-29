@@ -11,7 +11,7 @@ export interface DetallePedido {
 export interface DetallePedidoBody {
     cantidad: number,
     precioUnitario: number,
-    precioDescuento: number,
+    precioDescuento: number | null,
     subtotal: number,
     idProducto: number,
     idPedido: number

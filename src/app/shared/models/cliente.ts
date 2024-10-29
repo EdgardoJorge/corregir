@@ -5,7 +5,7 @@ export interface Cliente{
     telefonoMovil: string,
     tipoDocumento: string,
     numeroDocumento: string,
-    direccionFiscal?: string | null
+    direccionFiscal: string | null
 }
 
 export interface ClienteBody{

@@ -56,7 +56,7 @@ export class PaymentComponent implements OnInit{
     const telefonoMovil = localStorage.getItem('switchState') === 'true' ? localStorage.getItem('celularFactura') : localStorage.getItem('celularBoleta');
     const tipoDocumento = localStorage.getItem('switchState') === 'true' ? 'RUC' : 'DNI';
     const numeroDocumento = localStorage.getItem('switchState') === 'true' ? rucData?.ruc : dniData?.dni;
-    const direccionFiscal = localStorage.getItem('switchState') === 'true' ? rucData?.direccion : '1';
+    const direccionFiscal = localStorage.getItem('switchState') === 'true' ? rucData?.direccion : '';
 
     let envioData = null;
     let recojoData = null;
@@ -88,7 +88,7 @@ export class PaymentComponent implements OnInit{
       email: email,
       telefonoMovil: telefonoMovil,
       //leo no tengo ni idea pero lo que esta en tipo de documento se duplica en numero de documento cuando pones ambos en tipo de documento numero de documento se pone numero de documento
-      tipoDocumento: numeroDocumento,
+      tipoDocumento: tipoDocumento,
       numeroDocumento: numeroDocumento,
       direccionFiscal: direccionFiscal
     };
@@ -159,7 +159,7 @@ export class PaymentComponent implements OnInit{
       const cantidad = this.cantidades[id] || 0; // Usa la cantidad guardada en el localStorage
       this.productoService.getById(Number(id)).subscribe((producto: any) => {
         const precioUnitario = producto?.precio;
-        const precioDescuento = producto?.precioDescuento || precioUnitario;
+        const precioDescuento = producto?.precioDescuento || 0.0;
         const subtotal = precioDescuento > 0 ? precioDescuento * cantidad : precioUnitario * cantidad;
   
         const detallePedidoData: DetallePedidoBody = {
