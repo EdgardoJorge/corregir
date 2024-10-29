@@ -6,6 +6,8 @@ import { PedidoService } from '../../../../shared/services/pedido.service';
 import { DetallePedidoService } from '../../../../shared/services/detalle-pedido.service';
 import { ProductoService } from '../../../../shared/services/producto.service';
 import { __importDefault } from 'tslib';
+import { DetallePedidoBody } from '../../../../shared/models/detallePedido';
+import { CarritoService } from '../../../../shared/services/carrito.service';
 
 @Component({
   selector: 'app-payment',
@@ -13,7 +15,7 @@ import { __importDefault } from 'tslib';
   styleUrls: ['./payment.component.css']
 })
 export class PaymentComponent implements OnInit{
-  carritoIds: string[] = []
+  carritoIds: string[] = [];
   cantidades: { [key: string]: number } = {};
 
   constructor(
@@ -22,11 +24,22 @@ export class PaymentComponent implements OnInit{
     private clienteService: ClienteService,
     private pedidoService: PedidoService,
     private detallePedidoService: DetallePedidoService,
-    private productoService: ProductoService
+    private productoService: ProductoService,
+    private carritoService:CarritoService
   ) {}
+
   ngOnInit(): void {
-      
+    this.carritoIds = this.carritoService.getCarritoIds(); // Asegúrate de tener esto
+    this.cargarCantidadesDesdeStorage(); // Llama a este método
   }
+
+  cargarCantidadesDesdeStorage(): void {
+    const cantidadesGuardadas = localStorage.getItem('cantidades');
+    if (cantidadesGuardadas) {
+      this.cantidades = JSON.parse(cantidadesGuardadas);
+    }
+  }
+
   continue(): void {
     const selectedDepartamento = localStorage.getItem('selectedDepartamento');
     const selectedProvincia = localStorage.getItem('selectedProvincia');
@@ -137,27 +150,42 @@ export class PaymentComponent implements OnInit{
   }
 
   saveDetallePedido(pedidoId: number): void {
+    if (this.carritoIds.length === 0) {
+      console.error('No hay productos en el carrito.');
+      return;
+    }
+  
     for (const id of this.carritoIds) {
       const cantidad = this.cantidades[id] || 0; // Usa la cantidad guardada en el localStorage
       this.productoService.getById(Number(id)).subscribe((producto: any) => {
-        const precioUnitario = producto?.precio || 0;
-        const precioDescuento = producto?.precioDescuento || 0;
+        const precioUnitario = producto?.precio;
+        const precioDescuento = producto?.precioDescuento || precioUnitario;
         const subtotal = precioDescuento > 0 ? precioDescuento * cantidad : precioUnitario * cantidad;
   
-        const detallePedidoData = {
+        const detallePedidoData: DetallePedidoBody = {
           cantidad: cantidad,
           precioUnitario: precioUnitario,
           precioDescuento: precioDescuento,
           subtotal: subtotal,
-          idProducto: id,
+          idProducto: Number(id),
           idPedido: pedidoId
         };
   
+        console.log(detallePedidoData, "este es el detalle de pedido");
+  
         // Enviar cada detalle de pedido individualmente
-        this.detallePedidoService.create(detallePedidoData).subscribe((res) => {
-          // Manejo de respuesta aquí si es necesario
+        this.detallePedidoService.create(detallePedidoData).subscribe({
+          next: (res) => {
+            console.log('Detalle de pedido guardado:', res);
+          },
+          error: (err) => {
+            console.error('Error al guardar el detalle de pedido:', err);
+          }
         });
+      }, error => {
+        console.error('Error al obtener el producto:', error);
       });
     }
-  }  
+  }
+  
 }
