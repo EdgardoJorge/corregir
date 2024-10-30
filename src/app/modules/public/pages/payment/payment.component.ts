@@ -7,6 +7,7 @@ import { DetallePedidoService } from '../../../../shared/services/detalle-pedido
 import { ProductoService } from '../../../../shared/services/producto.service';
 import { DetallePedidoBody } from '../../../../shared/models/detallePedido';
 import { CarritoService } from '../../../../shared/services/carrito.service';
+import { ComprobanteService } from '../../../../shared/services/comprobante.service'; // Importa el servicio de comprobante
 
 @Component({
   selector: 'app-payment',
@@ -24,12 +25,13 @@ export class PaymentComponent implements OnInit {
     private pedidoService: PedidoService,
     private detallePedidoService: DetallePedidoService,
     private productoService: ProductoService,
-    private carritoService: CarritoService
+    private carritoService: CarritoService,
+    private comprobanteService: ComprobanteService // Inyecta el servicio de comprobante
   ) {}
 
   ngOnInit(): void {
-    this.carritoIds = this.carritoService.getCarritoIds(); // Asegúrate de tener esto
-    this.cargarCantidadesDesdeStorage(); // Llama a este método
+    this.carritoIds = this.carritoService.getCarritoIds();
+    this.cargarCantidadesDesdeStorage();
   }
 
   cargarCantidadesDesdeStorage(): void {
@@ -43,7 +45,7 @@ export class PaymentComponent implements OnInit {
     const selectedDepartamento = localStorage.getItem('selectedDepartamento');
     const selectedProvincia = localStorage.getItem('selectedProvincia');
     const selectedDistrito = localStorage.getItem('selectedDistrito');
-    const referencia = localStorage.getItem('referencia'); // Esto debería ser "calle y número"
+    const referencia = localStorage.getItem('referencia'); // "calle y número"
     const CodigoPostal = localStorage.getItem('CodigoPostal');
     const total = parseFloat(localStorage.getItem('totalCarrito') || '0');
 
@@ -61,17 +63,14 @@ export class PaymentComponent implements OnInit {
     let recojoData = null;
 
     if (selectedDepartamento && selectedProvincia && selectedDistrito && referencia && CodigoPostal) {
-      // Separar la referencia en calle y número
       const [calle, numeroDomicilio] = referencia.split('N°').map(part => part.trim());
-
-      // Crear la localidad a partir de region, provincia y distrito
       const localidad = `${selectedDepartamento} ${selectedProvincia} ${selectedDistrito}`;
 
       envioData = {
         region: selectedDepartamento,
         provincia: selectedProvincia,
         distrito: selectedDistrito,
-        localidad: localidad, // Usar la localidad creada
+        localidad: localidad,
         calle: calle,
         nDomicilio: numeroDomicilio,
         codigoPostal: CodigoPostal,
@@ -143,6 +142,7 @@ export class PaymentComponent implements OnInit {
           if (pedidoId != null) {
             localStorage.setItem('pedidoId', pedidoId.toString());
             this.saveDetallePedido(pedidoId);
+            this.createComprobante(clienteData, pedidoId); // Llama al método para crear el comprobante
           } else {
             console.error('Error: Pedido no contiene un id.', pedido);
           }
@@ -153,23 +153,39 @@ export class PaymentComponent implements OnInit {
     });
   }
 
+  createComprobante(clienteData: any, pedidoId: number): void {
+    const tipoDocumento = localStorage.getItem('switchState') === 'true' ? 'RUC' : 'DNI';
+    const tipoComprobante = tipoDocumento === 'RUC' ? 'Factura' : 'Boleta';
+    const fechaEmision = new Date();
+
+    const comprobanteData = {
+      tipoComprobante: tipoComprobante,
+      fechaEmision: fechaEmision,
+      idPedido: Number(pedidoId)
+    };
+
+    this.comprobanteService.create(comprobanteData).subscribe({
+      next: (res) => {
+        console.log('Comprobante creado:', res);
+      },
+      error: (err) => {
+        console.error('Error al crear el comprobante:', err);
+      }
+    });
+  }
+
   saveDetallePedido(pedidoId: number): void {
     if (this.carritoIds.length === 0) {
       console.error('No hay productos en el carrito.');
       return;
     }
-  
+
     for (const id of this.carritoIds) {
-      const cantidad = this.cantidades[id]; // Usa la cantidad guardada en el localStorage
+      const cantidad = this.cantidades[id]; 
       this.productoService.getById(Number(id)).subscribe((producto: any) => {
         const precioUnitario = producto?.precio;
         const precioDescuento = producto?.precioOferta || 0;
         const subtotal = precioDescuento > 0 ? precioDescuento * cantidad : precioUnitario * cantidad;
-        
-        console.log('Producto obtenido:', producto);
-        console.log('Precio unitario:', precioUnitario);
-        console.log('Precio de descuento:', precioDescuento);
-
 
         const detallePedidoData: DetallePedidoBody = {
           cantidad: cantidad,
@@ -179,10 +195,7 @@ export class PaymentComponent implements OnInit {
           idProducto: Number(id),
           idPedido: pedidoId
         };
-  
-        console.log(detallePedidoData, "este es el detalle de pedido");
-  
-        // Enviar cada detalle de pedido individualmente
+
         this.detallePedidoService.create(detallePedidoData).subscribe({
           next: (res) => {
             console.log('Detalle de pedido guardado:', res);

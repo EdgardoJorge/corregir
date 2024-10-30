@@ -11,3 +11,8 @@ export interface ComprobanteBody {
     fechaEmision:    Date,
     idPedido:        number,
 }
+export interface comprobantebo{
+    tipoComprobante: string,
+    fechaEmision:    Date,
+    idPedido:        number,
+}

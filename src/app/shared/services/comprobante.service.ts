@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Comprobante } from '../models/comprobante';
+import { Comprobante, comprobantebo, ComprobanteBody } from '../models/comprobante';
 import { environment } from '../../../environments/environment.development';
 import { Observable } from 'rxjs';
 
@@ -18,5 +18,9 @@ export class ComprobanteService {
 
   getById(idComprobante: number): Observable<Comprobante> {
     return this.http.get<Comprobante>(`${environment.backendBaseUrl}/api/store/comprobante/${idComprobante}`);
+  }
+  create(body: comprobantebo): Observable<Comprobante> {
+    const url = `${environment.backendBaseUrl}/api/store/comprobante`;
+    return this.http.post<Comprobante>(url, body);
   }
 }
