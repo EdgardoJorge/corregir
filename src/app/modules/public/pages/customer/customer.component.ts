@@ -21,21 +21,14 @@ export class CustomerComponent {
 
   constructor(private rucService: RucService, private dniService: DniService, private router: Router) {
     const storedSwitchState = localStorage.getItem('switchState');
-    console.log('Estado del switch recuperado de localStorage:', storedSwitchState); // Verificación
     this.switchState = storedSwitchState ? JSON.parse(storedSwitchState) : false;
   }
 
   fetchRucData(ruc: string) {
     this.rucService.getRucData(ruc).subscribe({
       next: (data) => {
-        if (data && (data.razonSocial || data.ruc)) {
-          this.rucData = data; 
-          this.noResultsRUC = false;
-        } else {
-          this.rucData = null;
-          this.noResultsRUC = true;
-        }
-        console.log(this.rucData);
+        this.rucData = data && (data.razonSocial || data.ruc) ? data : null;
+        this.noResultsRUC = !this.rucData;
       },
       error: (error) => {
         console.error('Error al obtener datos del RUC:', error);
@@ -48,14 +41,8 @@ export class CustomerComponent {
   fetchDniData(dni: string) {
     this.dniService.getDniData(dni).subscribe({
       next: (data) => {
-        if (data && (data.dni || data.nombres || data.apellidoPaterno || data.apellidoMaterno || data.codVerifica)) {
-          this.dniData = data;
-          this.noResultsDNI = false;
-        } else {
-          this.dniData = null;
-          this.noResultsDNI = true;
-        }
-        console.log(this.dniData);
+        this.dniData = data && (data.dni || data.nombres || data.apellidoPaterno || data.apellidoMaterno || data.codVerifica) ? data : null;
+        this.noResultsDNI = !this.dniData;
       },
       error: (error) => {
         console.error('Error al obtener datos del DNI:', error);
@@ -66,13 +53,22 @@ export class CustomerComponent {
   }
 
   toggleSwitch() {
-    localStorage.setItem('switchState', JSON.stringify(this.switchState)); // Guarda en localStorage
-    console.log('Switch state guardado en localStorage:', this.switchState); // Verificación
+    localStorage.setItem('switchState', JSON.stringify(this.switchState));
+  }
+
+  isEmailValid(email: string): boolean {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
+  }
+
+  isCelularValid(celular: string): boolean {
+    const celularPattern = /^[0-9]{9}$/;
+    return celularPattern.test(celular);
   }
 
   continue() {
-    const isBoletaComplete = this.gmailBoleta && this.celularBoleta;
-    const isFacturaComplete = this.gmailFactura && this.celularFactura;
+    const isBoletaComplete = this.isEmailValid(this.gmailBoleta) && this.isCelularValid(this.celularBoleta);
+    const isFacturaComplete = this.isEmailValid(this.gmailFactura) && this.isCelularValid(this.celularFactura);
 
     if (isBoletaComplete || isFacturaComplete) {
       if (isBoletaComplete) {
@@ -87,7 +83,7 @@ export class CustomerComponent {
       }
       this.router.navigate(['/recorrido/ubicacion']);
     } else {
-      alert("Por favor, completa todos los datos de boleta o factura antes de continuar.");
+      alert("Por favor, completa todos los datos de boleta o factura correctamente antes de continuar.");
     }
   }
 }

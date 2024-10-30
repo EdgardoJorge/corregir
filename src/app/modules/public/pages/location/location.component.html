@@ -102,20 +102,30 @@
             </div>
             
             <div class="relative">
-                <label class="block text-black text-sm roboto-bold pl-1 pt-4 mb-2 text-left" for="Referencia">Referencia</label>
-                <input type="text" class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline" 
-                      name="direccion" placeholder="Indique direccion para la entrega" 
-                      [(ngModel)]="referencia" />
-                <div *ngIf="referenciaError" class="text-red-500 text-sm pl-1">Este campo es obligatorio</div>
-            </div>
+              <label class="block text-black text-sm roboto-bold pl-1 pt-4 mb-2 text-left" for="Referencia">Referencia</label>
+              <span class="text-red-500">* después de la calle, para poner el número de la calle use N°</span>
+              <input type="text" 
+                     class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline" 
+                     name="direccion" 
+                     placeholder="Indique direccion para la entrega" 
+                     [(ngModel)]="referencia" 
+                     (input)="validateReferencia()" />
+              <div *ngIf="referenciaError" class="text-red-500 text-sm pl-1">Este campo es obligatorio y debe contener un N° y despues el numero de su calle</div>
+          </div>
+          
   
             <div class="relative">
               <label class="block text-black text-sm roboto-bold pl-1 pt-4 mb-2 text-left" for="CodigoPostal">Codigo Postal</label>
-              <input type="text" class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline" 
-                    name="direccion" placeholder="Indique Código Postal de su localidad" 
-                    [(ngModel)]="CodigoPostal" />
-              <div *ngIf="CodigoPostalError" class="text-red-500 text-sm pl-1">Este campo es obligatorio</div>
+              <input type="text" 
+                     class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline" 
+                     name="direccion" 
+                     placeholder="Indique Código Postal de su localidad" 
+                     [(ngModel)]="CodigoPostal" 
+                     (input)="validateCodigoPostal()"
+                     pattern="^[0-9]*$" />
+              <div *ngIf="CodigoPostalError" class="text-red-500 text-sm pl-1">Este campo es obligatorio y solo debe contener números</div>
           </div>
+          
   
             <div class="relative pt-6">
             <button class="w-full bg-orange-500 hover:bg-orange-700 text-white roboto-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline" type="button" (click)="continue()">CONTINUAR</button>

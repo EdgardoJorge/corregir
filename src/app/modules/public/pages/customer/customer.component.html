@@ -130,13 +130,38 @@
 
                 <div class="mb-4">
                     <label class="block text-black text-sm roboto-bold pl-1 mb-2 text-left" for="email">Correo Electrónico:</label>
-                    <input class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline" type="email" id="email" placeholder="Ingrese su correo electrónico" [(ngModel)]="gmailBoleta" name="gmail" required>
+                    <input
+                      class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+                      type="email"
+                      id="email"
+                      placeholder="Ingrese su correo electrónico"
+                      [(ngModel)]="gmailBoleta"
+                      name="gmail"
+                      required
+                      email
+                    />
+                    <div *ngIf="gmailBoleta?.length && !isEmailValid(gmailBoleta)" class="text-red-600 text-sm">
+                      El correo electrónico debe contener un '&#64;'.
+                    </div>
                   </div>
-                
-                <div class="mb-4">
+                  
+                  <div class="mb-4">
                     <label class="block text-black text-sm roboto-bold pl-1 mb-2 text-left" for="celular">Celular:</label>
-                    <input class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline" type="text" id="celular" placeholder="Ingrese su número de celular" [(ngModel)]="celularBoleta" name="celular" required>
-                </div>
+                    <input
+                      class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+                      type="text"
+                      id="celular"
+                      placeholder="Ingrese su número de celular"
+                      [(ngModel)]="celularBoleta"
+                      name="celular"
+                      required
+                      pattern="^[0-9]{9}$"
+                    />
+                    <div *ngIf="celularBoleta?.length && !isCelularValid(celularBoleta)" class="text-red-600 text-sm">
+                      El número de celular debe contener solo 9 dígitos.
+                    </div>
+                  </div>
+                  
               </div>              
             <label for="terminos" class="text-gray-600 flex items-center mb-4">
                 <input type="checkbox" id="terminos" class="mr-2 leading-tight">
@@ -214,12 +239,21 @@
 
             <div class="mb-4">
                 <label class="block text-black text-sm roboto-bold pl-1 mb-2 text-left" for="email">Correo electrónico:</label>
-                <input class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline" type="email" id="email" placeholder="Ingrese su correo electrónico" [(ngModel)]="gmailFactura" name="gmail" required>
+                <input class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline" type="email" id="email" placeholder="Ingrese su correo electrónico" [(ngModel)]="gmailFactura" name="gmail" required
+                email>
+                <div *ngIf="gmailFactura?.length && !isEmailValid(gmailFactura)" class="text-red-600 text-sm">
+                    El correo electrónico debe contener un '&#64;'.
+                  </div>
               </div>
             
             <div class="mb-4">
                 <label class="block text-black text-sm roboto-bold pl-1 mb-2 text-left" for="celular">Celular:</label>
-                <input class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline" type="text" id="celular" placeholder="Ingrese su número de celular" [(ngModel)]="celularFactura" name="celular" required>
+                <input class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline" type="text" id="celular" placeholder="Ingrese su número de celular" [(ngModel)]="celularFactura" name="celular" required
+                pattern="^[0-9]{9}$">
+                <div *ngIf="celularFactura?.length && !isCelularValid(celularFactura)" class="text-red-600 text-sm">
+                    El número de celular debe contener solo 9 dígitos.
+                  </div>
+
             </div>
            
             <label for="terminos" class="text-gray-600 flex items-center mb-4">

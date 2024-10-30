@@ -61,7 +61,13 @@ export class LocationComponent implements OnInit {
       .map((item: any) => item.distrito);
     this.selectedDistrito = '';
   }
-
+  validateCodigoPostal() {
+    this.CodigoPostalError = this.CodigoPostal.trim() === '' || !/^[0-9]*$/.test(this.CodigoPostal);
+  }
+  validateReferencia() {
+    const regex = /N°\d+/; // Busca un guion seguido de uno o más dígitos
+    this.referenciaError = this.referencia.trim() === '' || !regex.test(this.referencia);
+  }
   continue(): void {
     if (this.switchState) {
         // Si es recojo, se permite continuar sin validar campos

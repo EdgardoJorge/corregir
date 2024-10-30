@@ -5,7 +5,6 @@ import { ClienteService } from '../../../../shared/services/cliente.service';
 import { PedidoService } from '../../../../shared/services/pedido.service';
 import { DetallePedidoService } from '../../../../shared/services/detalle-pedido.service';
 import { ProductoService } from '../../../../shared/services/producto.service';
-import { __importDefault } from 'tslib';
 import { DetallePedidoBody } from '../../../../shared/models/detallePedido';
 import { CarritoService } from '../../../../shared/services/carrito.service';
 
@@ -14,7 +13,7 @@ import { CarritoService } from '../../../../shared/services/carrito.service';
   templateUrl: './payment.component.html',
   styleUrls: ['./payment.component.css']
 })
-export class PaymentComponent implements OnInit{
+export class PaymentComponent implements OnInit {
   carritoIds: string[] = [];
   cantidades: { [key: string]: number } = {};
 
@@ -25,7 +24,7 @@ export class PaymentComponent implements OnInit{
     private pedidoService: PedidoService,
     private detallePedidoService: DetallePedidoService,
     private productoService: ProductoService,
-    private carritoService:CarritoService
+    private carritoService: CarritoService
   ) {}
 
   ngOnInit(): void {
@@ -44,7 +43,7 @@ export class PaymentComponent implements OnInit{
     const selectedDepartamento = localStorage.getItem('selectedDepartamento');
     const selectedProvincia = localStorage.getItem('selectedProvincia');
     const selectedDistrito = localStorage.getItem('selectedDistrito');
-    const referencia = localStorage.getItem('referencia');
+    const referencia = localStorage.getItem('referencia'); // Esto debería ser "calle y número"
     const CodigoPostal = localStorage.getItem('CodigoPostal');
     const total = parseFloat(localStorage.getItem('totalCarrito') || '0');
 
@@ -62,13 +61,19 @@ export class PaymentComponent implements OnInit{
     let recojoData = null;
 
     if (selectedDepartamento && selectedProvincia && selectedDistrito && referencia && CodigoPostal) {
+      // Separar la referencia en calle y número
+      const [calle, numeroDomicilio] = referencia.split('N°').map(part => part.trim());
+
+      // Crear la localidad a partir de region, provincia y distrito
+      const localidad = `${selectedDepartamento} ${selectedProvincia} ${selectedDistrito}`;
+
       envioData = {
         region: selectedDepartamento,
         provincia: selectedProvincia,
         distrito: selectedDistrito,
-        localidad: selectedDistrito,
-        calle: referencia,
-        nDomicilio: '611',
+        localidad: localidad, // Usar la localidad creada
+        calle: calle,
+        nDomicilio: numeroDomicilio,
         codigoPostal: CodigoPostal,
         fechaEnvio: null,
         fechaEntrega: null,
@@ -87,7 +92,6 @@ export class PaymentComponent implements OnInit{
       razonSocial: razonSocial,
       email: email,
       telefonoMovil: telefonoMovil,
-      //leo no tengo ni idea pero lo que esta en tipo de documento se duplica en numero de documento cuando pones ambos en tipo de documento numero de documento se pone numero de documento
       tipoDocumento: tipoDocumento,
       numeroDocumento: numeroDocumento,
       direccionFiscal: direccionFiscal
@@ -156,12 +160,17 @@ export class PaymentComponent implements OnInit{
     }
   
     for (const id of this.carritoIds) {
-      const cantidad = this.cantidades[id] || 0; // Usa la cantidad guardada en el localStorage
+      const cantidad = this.cantidades[id]; // Usa la cantidad guardada en el localStorage
       this.productoService.getById(Number(id)).subscribe((producto: any) => {
         const precioUnitario = producto?.precio;
-        const precioDescuento = producto?.precioDescuento || 0.0;
+        const precioDescuento = producto?.precioOferta || 0;
         const subtotal = precioDescuento > 0 ? precioDescuento * cantidad : precioUnitario * cantidad;
-  
+        
+        console.log('Producto obtenido:', producto);
+        console.log('Precio unitario:', precioUnitario);
+        console.log('Precio de descuento:', precioDescuento);
+
+
         const detallePedidoData: DetallePedidoBody = {
           cantidad: cantidad,
           precioUnitario: precioUnitario,
@@ -187,5 +196,4 @@ export class PaymentComponent implements OnInit{
       });
     }
   }
-  
 }
